@@ -1,14 +1,13 @@
-import SignUp from "./components/sign-up";
-import SignIn from "./components/sign-in";
+import Navbar from "./components/navbar";
 
 export default function Page() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen ">
-      <h1>Welcome to The African Wave</h1>
-      <p>Shaping narratives</p>
-      
-      {/* <SignUp /> */}
-      <SignIn />
-    </div>
+    <>
+      <Navbar />
+      <div className="flex flex-col items-center justify-center min-h-screen ">
+        <h1>Welcome to The African Wave</h1>
+        <p>Shaping narratives</p>
+      </div>
+    </>
   );
 }
