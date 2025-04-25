@@ -1,4 +1,8 @@
+# The African Wave
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+Note: This is not the official repo for The African Wave or a forked version of it.
 
 ## Getting Started
 
