@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { app } from "../lib/firebase";
 import { getFirestore } from "firebase/firestore";
 import ArticleCard from "../components/articlecard";
+import { useAuth } from "../lib/AuthContext";
+import { useRouter } from "next/navigation";
 import {
   loadAllArticles,
   loadArticlesByCategory,
@@ -12,6 +14,8 @@ import {
 } from "../lib/api/rssFeeds";
 
 export default function RssFeeds() {
+  const { user, authLoading } = useAuth();
+  const router = useRouter();
   const [category, setCategory] = useState("all_articles");
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -20,6 +24,12 @@ export default function RssFeeds() {
   const [debugMode, setDebugMode] = useState(true);
   const [exploring, setExploring] = useState(false);
   const [databaseStructure, setDatabaseStructure] = useState(null);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/sign-in");
+    }
+  }, [user, authLoading, router]);
 
   useEffect(() => {
     const db = getFirestore(app);

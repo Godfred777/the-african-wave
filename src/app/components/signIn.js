@@ -1,16 +1,27 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { auth } from "../lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../lib/AuthContext";
 
 export default function SignIn() {
+  const router = useRouter();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
   const [errors, setErrors] = useState({});
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      router.push("/rssfeeds");
+    }
+  }, [user, router]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,6 +42,7 @@ export default function SignIn() {
         .then((userCredential) => {
           const user = userCredential.user;
           console.log("User signed in:", user);
+          router.push("/rssfeeds");
         })
         .catch((error) => {
           console.error("Error signing in:", error.code, error.message);
@@ -57,7 +69,10 @@ export default function SignIn() {
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email
               </label>
               <input
@@ -75,7 +90,10 @@ export default function SignIn() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <input
@@ -109,7 +127,10 @@ export default function SignIn() {
           <div className="text-center mt-4">
             <p className="text-sm text-gray-600">
               Don't have an account?{" "}
-              <Link href="/sign-up" className="text-indigo-600 hover:text-indigo-500 font-medium">
+              <Link
+                href="/sign-up"
+                className="text-indigo-600 hover:text-indigo-500 font-medium"
+              >
                 Sign up here
               </Link>
             </p>
