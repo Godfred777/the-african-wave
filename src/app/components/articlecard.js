@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { formatDate, getSentimentClass, getSentimentText } from "../lib/utils";
 
 //Article card component
@@ -9,12 +10,13 @@ const ArticleCard = ({ article, debugMode }) => {
 
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-transform hover:-translate-y-1">
-      <div className="h-44 bg-gray-100 flex items-center justify-center overflow-hidden">
+      <div className="h-44 bg-gray-100 flex items-center justify-center overflow-hidden relative">
         {hasImage ? (
-          <img
+          <Image
             src={article.imageUrl}
             alt={article.title}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src =
@@ -22,10 +24,11 @@ const ArticleCard = ({ article, debugMode }) => {
             }}
           />
         ) : (
-          <img
+          <Image
             src="https://via.placeholder.com/300x180?text=No+Image"
             alt="No image available"
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
           />
         )}
       </div>
