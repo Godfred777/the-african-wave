@@ -2,17 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { app } from "../lib/firebase";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  doc,
-  getDoc,
-  query,
-  limit,
-  where,
-} from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 import ArticleCard from "../components/articlecard";
+import {
+  loadAllArticles,
+  loadArticlesByCategory,
+  exploreDatabase,
+  searchCollection,
+} from "../lib/api/rssFeeds";
 
 export default function RssFeeds() {
   const [category, setCategory] = useState("all_articles");
@@ -29,140 +26,19 @@ export default function RssFeeds() {
   }, []);
 
   // Load articles based on category
-  const loadArticles = async () => {
+  const handleLoadArticles = async () => {
     setLoading(true);
     setError(null);
     setSuccessPaths([]);
     setExploring(false);
 
     try {
-      const db = getFirestore();
-      let allArticles = [];
-      let paths = [];
-
+      let result;
       if (category === "all_articles") {
-        // Try different collection paths based on our investigation
-        const possiblePaths = [
-          {
-            type: "nested",
-            collection: "rss_articles",
-            subcollections: [
-              "technology",
-              "business",
-              "science",
-              "health",
-              "politics",
-              "entertainment",
-              "sports",
-            ],
-          },
-          // Alternative path: maybe all articles are in one collection
-          { type: "direct", collection: "rss_articles" },
-          // Another possibility: articles collection at root
-          { type: "direct", collection: "articles" },
-          // Try with different casing
-          {
-            type: "nested",
-            collection: "RSS_Articles",
-            subcollections: [
-              "technology",
-              "business",
-              "science",
-              "health",
-              "politics",
-              "entertainment",
-              "sports",
-            ],
-          },
-          // Try with categoryML value as document ID
-          {
-            type: "nested",
-            collection: "rss_articles",
-            subcollections: [
-              "Technology",
-              "Business",
-              "Science",
-              "Health",
-              "Politics",
-              "Entertainment",
-              "Sports",
-            ],
-          },
-        ];
-
-        // Try all possible paths
-        for (const path of possiblePaths) {
-          if (path.type === "direct") {
-            try {
-              const articlesRef = collection(db, path.collection);
-              const articlesQuery = query(articlesRef, limit(50));
-              const snapshot = await getDocs(articlesQuery);
-
-              if (!snapshot.empty) {
-                snapshot.forEach((doc) => {
-                  allArticles.push({
-                    id: doc.id,
-                    ...doc.data(),
-                    _path: path.collection,
-                  });
-                });
-                paths.push(`Direct collection: ${path.collection}`);
-              }
-            } catch (e) {
-              console.log(`Error with path ${path.collection}:`, e);
-            }
-          } else if (path.type === "nested") {
-            for (const subCol of path.subcollections) {
-              try {
-                // Try as document -> subcollection
-                const nestedPath = `${path.collection}/${subCol}/articles`;
-                const articlesRef = collection(
-                  db,
-                  path.collection,
-                  subCol,
-                  "articles"
-                );
-                const articlesQuery = query(articlesRef, limit(20));
-                const snapshot = await getDocs(articlesQuery);
-
-                if (!snapshot.empty) {
-                  snapshot.forEach((doc) => {
-                    allArticles.push({
-                      id: doc.id,
-                      ...doc.data(),
-                      _path: nestedPath,
-                      _category: subCol,
-                    });
-                  });
-                  paths.push(`Nested path: ${nestedPath}`);
-                }
-
-                // Also try with direct category value as document
-                const directCategoryPath = `${path.collection}/${subCol}`;
-                const directRef = doc(db, path.collection, subCol);
-                const directSnapshot = await getDoc(directRef);
-
-                if (directSnapshot.exists()) {
-                  allArticles.push({
-                    id: directSnapshot.id,
-                    ...directSnapshot.data(),
-                    _path: directCategoryPath,
-                    _category: subCol,
-                  });
-                  paths.push(`Direct document: ${directCategoryPath}`);
-                }
-              } catch (e) {
-                console.log(
-                  `No articles found for path: ${path.collection}/${subCol}/articles`
-                );
-              }
-            }
-          }
-        }
-
-        if (allArticles.length > 0) {
+        result = await loadAllArticles();
+        if (result.articles.length > 0) {
           // Sort by date if possible
-          allArticles.sort((a, b) => {
+          result.articles.sort((a, b) => {
             const dateA = a.createdAt
               ? a.createdAt.toDate
                 ? a.createdAt.toDate().getTime()
@@ -176,101 +52,16 @@ export default function RssFeeds() {
             return dateB - dateA;
           });
 
-          setSuccessPaths(paths);
-          setArticles(allArticles);
+          setSuccessPaths(result.paths);
+          setArticles(result.articles);
         } else {
           setError("No articles found in any of the typical database paths.");
         }
       } else {
-        // Try multiple possible paths for specific category
-        const possiblePaths = [
-          // Standard path
-          { path: `rss_articles/${category}/articles` },
-          // Category as collection
-          { path: `${category}` },
-          // CategoryML may be stored with different casing
-          {
-            path: `rss_articles/${
-              category.charAt(0).toUpperCase() + category.slice(1)
-            }/articles`,
-          },
-          // Maybe just a flat structure
-          { path: `rss_articles` },
-          // Or articles at root
-          { path: `articles` },
-        ];
-
-        let categoryArticles = [];
-        let foundPath = null;
-
-        // Try each path
-        for (const { path } of possiblePaths) {
-          try {
-            const components = path.split("/");
-
-            if (components.length === 1) {
-              // Direct collection
-              const collectionRef = collection(db, components[0]);
-              let queryRef;
-
-              // For direct collections, try to filter by category if it's the "articles" or "rss_articles" collection
-              if (
-                components[0] === "articles" ||
-                components[0] === "rss_articles"
-              ) {
-                queryRef = query(
-                  collectionRef,
-                  where("categoryML", "==", category),
-                  limit(50)
-                );
-              } else {
-                queryRef = query(collectionRef, limit(50));
-              }
-
-              const snapshot = await getDocs(queryRef);
-
-              if (!snapshot.empty) {
-                snapshot.forEach((doc) => {
-                  categoryArticles.push({
-                    id: doc.id,
-                    ...doc.data(),
-                    _path: path,
-                  });
-                });
-                foundPath = path;
-                break;
-              }
-            } else if (components.length === 3) {
-              // Collection/Document/Subcollection
-              const subcollectionRef = collection(
-                db,
-                components[0],
-                components[1],
-                components[2]
-              );
-              const queryRef = query(subcollectionRef, limit(50));
-              const snapshot = await getDocs(queryRef);
-
-              if (!snapshot.empty) {
-                snapshot.forEach((doc) => {
-                  categoryArticles.push({
-                    id: doc.id,
-                    ...doc.data(),
-                    _path: path,
-                  });
-                });
-                foundPath = path;
-                break;
-              }
-            }
-          } catch (e) {
-            console.log(`Error with path ${path}:`, e);
-          }
-        }
-
-        if (categoryArticles.length > 0) {
-          setSuccessPaths([`Found articles at path: ${foundPath}`]);
-          setArticles(categoryArticles);
+        result = await loadArticlesByCategory(category);
+        if (result.articles.length > 0) {
+          setSuccessPaths([`Found articles at path: ${result.path}`]);
+          setArticles(result.articles);
         } else {
           setError(
             `No articles found for category: ${category} in any of the typical paths`
@@ -291,60 +82,13 @@ export default function RssFeeds() {
   };
 
   // Explore database structure
-  const exploreDatabase = async () => {
+  const handleExploreDatabase = async () => {
     setLoading(true);
     setError(null);
     setExploring(true);
 
     try {
-      const db = getFirestore();
-      const knownCollections = ["rss_articles", "articles", "RSS_Articles"];
-      let structure = [];
-
-      for (const collectionId of knownCollections) {
-        try {
-          const collectionRef = collection(db, collectionId);
-          const querySnapshot = await getDocs(query(collectionRef, limit(5)));
-
-          if (!querySnapshot.empty) {
-            const collectionData = {
-              id: collectionId,
-              documents: [],
-            };
-
-            querySnapshot.forEach((docSnapshot) => {
-              const docData = docSnapshot.data();
-              const fields = Object.keys(docData)
-                .slice(0, 3)
-                .map((key) => {
-                  let displayValue = "";
-                  const value = docData[key];
-
-                  if (value === null) {
-                    displayValue = "null";
-                  } else if (typeof value === "object") {
-                    displayValue = "Object";
-                  } else {
-                    displayValue = String(value).substring(0, 50);
-                    if (String(value).length > 50) displayValue += "...";
-                  }
-
-                  return { key, value: displayValue };
-                });
-
-              collectionData.documents.push({
-                id: docSnapshot.id,
-                fields,
-              });
-            });
-
-            structure.push(collectionData);
-          }
-        } catch (error) {
-          console.error(`Error exploring collection ${collectionId}:`, error);
-        }
-      }
-
+      const structure = await exploreDatabase();
       setDatabaseStructure(structure);
     } catch (error) {
       console.error("Error exploring database:", error);
@@ -355,7 +99,7 @@ export default function RssFeeds() {
   };
 
   // Search for a specific collection
-  const searchCollection = async () => {
+  const handleSearchCollection = async () => {
     const collectionPath = prompt(
       "Enter collection path (e.g., rss_articles/technology/articles)"
     );
@@ -366,46 +110,11 @@ export default function RssFeeds() {
     setExploring(true);
 
     try {
-      const db = getFirestore();
-      const pathComponents = collectionPath.split("/");
-      let querySnapshot;
-
-      if (pathComponents.length === 1) {
-        // Simple collection path
-        const collectionRef = collection(db, pathComponents[0]);
-        querySnapshot = await getDocs(query(collectionRef, limit(10)));
-      } else if (pathComponents.length === 3) {
-        // Collection > Document > Subcollection
-        const subcollectionRef = collection(
-          db,
-          pathComponents[0],
-          pathComponents[1],
-          pathComponents[2]
-        );
-        querySnapshot = await getDocs(query(subcollectionRef, limit(10)));
-      } else {
-        throw new Error(
-          'Invalid path format. Use format: "collection" or "collection/document/subcollection"'
-        );
-      }
-
-      if (querySnapshot.empty) {
+      const result = await searchCollection(collectionPath);
+      if (!result) {
         setError(`No documents found at path: ${collectionPath}`);
       } else {
-        const documents = [];
-        querySnapshot.forEach((doc) => {
-          documents.push({
-            id: doc.id,
-            data: doc.data(),
-          });
-        });
-
-        setDatabaseStructure([
-          {
-            id: collectionPath,
-            documents,
-          },
-        ]);
+        setDatabaseStructure(result);
       }
     } catch (error) {
       console.error("Error searching collection:", error);
@@ -441,21 +150,21 @@ export default function RssFeeds() {
             </select>
 
             <button
-              onClick={loadArticles}
+              onClick={handleLoadArticles}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow-sm transition-colors duration-200 font-medium"
             >
               Load Articles
             </button>
 
-            <button
-              onClick={exploreDatabase}
+            {/* <button
+              onClick={handleExploreDatabase}
               className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg shadow-sm transition-colors duration-200 font-medium"
             >
               Explore Database
-            </button>
+            </button> */}
 
             <button
-              onClick={searchCollection}
+              onClick={handleSearchCollection}
               className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg shadow-sm transition-colors duration-200 font-medium"
             >
               Search Collection
