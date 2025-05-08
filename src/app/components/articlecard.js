@@ -1,6 +1,9 @@
 import React from "react";
 import { formatDate, getSentimentClass, getSentimentText } from "../lib/utils";
 
+//Article card component
+// Displays the article title, image, source, publication date, sentiment, and category
+// Also includes a debug mode that shows the raw data and image URL
 const ArticleCard = ({ article, debugMode }) => {
   const hasImage = article.imageUrl && article.imageUrl.startsWith("http");
 
