@@ -469,7 +469,7 @@ export default function RssFeeds() {
                     No Articles Loaded
                   </h3>
                   <p className="text-green-600 max-w-md">
-                    Select a category and click "Load Articles" to see your RSS
+                    Select a category and click Load Articles to see your RSS
                     feeds.
                   </p>
                 </div>
