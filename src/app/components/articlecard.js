@@ -36,7 +36,7 @@ const ArticleCard = ({ article, debugMode }) => {
             href={article.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-blue-600"
+            className="hover:text-blue-600 text-gray-800"
           >
             {article.title}
           </a>

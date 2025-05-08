@@ -428,7 +428,7 @@ export default function RssFeeds() {
               id="categorySelect"
               value={category}
               onChange={handleCategoryChange}
-              className="px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              className="px-4 py-2 text-black rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
             >
               <option value="all_articles">All Articles</option>
               <option value="technology">Technology</option>
