@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { auth } from "../lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../lib/AuthContext";
 
@@ -63,13 +64,25 @@ export default function SignUp() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12 bg-gradient-to-br from-gray-900 to-gray-800">
-      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-2xl">
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12 bg-gradient-to-b from-white to-stone-100">
+      <div className="w-full max-w-md space-y-6 bg-white p-8 rounded-xl shadow-md border border-stone-200">
         <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <div className="relative w-16 h-16">
+              <Image
+                src="/logo.png" // Replace with your actual logo path
+                alt="The African Wave Logo"
+                fill
+                style={{ objectFit: "contain" }}
+                priority
+              />
+            </div>
+          </div>
+          <h2 className="text-3xl font-bold text-green-800 mb-2">
             Create Account
           </h2>
-          <p className="text-gray-600">Sign up to get started</p>
+          <p className="text-green-700">Sign up to get started</p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
@@ -77,12 +90,12 @@ export default function SignUp() {
             <div>
               <label
                 htmlFor="username"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-green-800"
               >
                 Username
               </label>
               <input
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 block w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 type="text"
                 id="username"
                 name="username"
@@ -98,12 +111,12 @@ export default function SignUp() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-green-800"
               >
                 Email
               </label>
               <input
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 block w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 type="email"
                 id="email"
                 name="email"
@@ -119,12 +132,12 @@ export default function SignUp() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-green-800"
               >
                 Password
               </label>
               <input
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 block w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 type="password"
                 id="password"
                 name="password"
@@ -140,12 +153,12 @@ export default function SignUp() {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-green-800"
               >
                 Confirm Password
               </label>
               <input
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 block w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 type="password"
                 id="confirmPassword"
                 name="confirmPassword"
@@ -169,17 +182,17 @@ export default function SignUp() {
 
           <button
             type="submit"
-            className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+            className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out"
           >
             Sign Up
           </button>
 
           <div className="text-center mt-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-green-700">
               Already have an account?{" "}
               <Link
                 href="/sign-in"
-                className="text-indigo-600 hover:text-indigo-500 font-medium"
+                className="text-green-800 hover:text-green-900 font-medium underline"
               >
                 Sign in here
               </Link>
