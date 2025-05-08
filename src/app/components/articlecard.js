@@ -70,7 +70,7 @@ const ArticleCard = ({ article, debugMode }) => {
           </span>
         </div>
 
-        {debugMode && (
+        {/* {debugMode && (
           <div className="mt-3 p-3 bg-gray-100 rounded-md text-xs text-gray-600 whitespace-pre-wrap overflow-x-auto">
             <strong>Image URL:</strong> {article.imageUrl || "null"}
             <br />
@@ -88,7 +88,7 @@ const ArticleCard = ({ article, debugMode }) => {
               )}
             </pre>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
