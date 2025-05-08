@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { auth } from "./firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 export default function SignUp() {
     const [formData, setFormData] = useState({
@@ -34,6 +36,18 @@ export default function SignUp() {
             // Submit the form
             console.log('Form submitted:', formData);
             // Add your API call here
+            createUserWithEmailAndPassword(auth, formData.email, formData.password)
+                .then((userCredential) => {
+                    // Signed in 
+                    const user = userCredential.user;
+                    console.log('User signed up:', user);
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    console.error('Error signing up:', errorCode, errorMessage);
+                    setErrors({ ...errors, signUp: 'Failed to sign up. Please try again.' });
+                });
         } else {
             setErrors(newErrors);
         }

@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { auth } from "./firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function SignIn() {
 
@@ -29,6 +31,19 @@ export default function SignIn() {
             // Submit the form
             console.log('Form submitted:', formData); // Uncommented for debugging
             // Add your API call here
+            signInWithEmailAndPassword(auth, formData.email, formData.password)
+                .then((userCredential) => {
+                    // Signed in 
+                    const user = userCredential.user;
+                    console.log('User signed in:', user); // Uncommented for debugging
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    console.error('Error signing in:', errorCode, errorMessage); // Uncommented for debugging
+                    setErrors({ ...errors, signIn: 'Failed to sign in. Please check your credentials.' });
+                });
+
         } else {
             setErrors(newErrors);
         }
