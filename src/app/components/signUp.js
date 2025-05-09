@@ -1,119 +1,205 @@
 "use client";
-import { useState } from "react";
-import { auth } from "../firebase.js";
+import { useState, useEffect } from "react";
+import { auth } from "../lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../lib/AuthContext";
 
 export default function SignUp() {
-    const [formData, setFormData] = useState({
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-    });
+  const router = useRouter();
+  const { user } = useAuth();
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-    const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({});
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prevState => ({
-            ...prevState,
-            [name]: value
-        }));
-    };
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      router.push("/rssfeeds");
+    }
+  }, [user, router]);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // Basic validation
-        const newErrors = {};
-        if (!formData.username) newErrors.username = 'Username is required';
-        if (!formData.email) newErrors.email = 'Email is required';
-        if (!formData.password) newErrors.password = 'Password is required';
-        if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = 'Passwords do not match';
-        }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
 
-        if (Object.keys(newErrors).length === 0) {
-            // Submit the form
-            console.log('Form submitted:', formData);
-            // Add your API call here
-            createUserWithEmailAndPassword(auth, formData.email, formData.password)
-                .then((userCredential) => {
-                    // Signed in 
-                    const user = userCredential.user;
-                    console.log('User signed up:', user);
-                })
-                .catch((error) => {
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    console.error('Error signing up:', errorCode, errorMessage);
-                    setErrors({ ...errors, signUp: 'Failed to sign up. Please try again.' });
-                });
-        } else {
-            setErrors(newErrors);
-        }
-    };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newErrors = {};
+    if (!formData.username) newErrors.username = "Username is required";
+    if (!formData.email) newErrors.email = "Email is required";
+    if (!formData.password) newErrors.password = "Password is required";
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
 
-    return (
-        <div className="flex min-h-full flex-col items-center justify-center px-6 py-12 lg:px-8">
-            <h2
-                className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white-900"
-            >
-                Sign Up for an Account
-            </h2>
-            <h2 className="mt-10 text-center text-2xl">Welcome! Please fill in the details below:</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label htmlFor="username">Username:</label>
-                    <input className="inline-block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm"
-                        type="text"
-                        id="username"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                    />
-                    {errors.username && <span className="text-red-500 text-xs italic mt-1.5 block">{errors.username}</span>}
-                </div>
+    if (Object.keys(newErrors).length === 0) {
+      createUserWithEmailAndPassword(auth, formData.email, formData.password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          console.log("User signed up:", user);
+          router.push("/rssfeeds");
+        })
+        .catch((error) => {
+          console.error("Error signing up:", error.code, error.message);
+          setErrors({
+            ...errors,
+            signUp: "Failed to sign up. Please try again.",
+          });
+        });
+    } else {
+      setErrors(newErrors);
+    }
+  };
 
-                <div className="mb-4">
-                    <label htmlFor="email">Email:</label>
-                    <input className="inline-block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                    />
-                    {errors.email && <span className="text-red-500 text-xs italic mt-1.5 block">{errors.email}</span>}
-                </div>
-
-                <div className="mb-4">
-                    <label htmlFor="password">Password:</label>
-                    <input className="inline-block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm"
-                        type="password"
-                        id="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                    />
-                    {errors.password && <span className="text-red-500 text-xs italic mt-1.5 block">{errors.password}</span>}
-                </div>
-
-                <div className="form-group">
-                    <label htmlFor="confirmPassword">Confirm Password:</label>
-                    <input className="inline-block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm"
-                        type="password"
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                    />
-                    {errors.confirmPassword && <span className="text-red-500 text-xs italic mt-1.5 block">{errors.confirmPassword}</span>}
-                </div>
-
-                <button className="mt-2.5 flex w-full justify-center rounded-md bg-black bg-opacity-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-gray-500 hover:text-amber-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                Sign Up
-                </button>
-            </form>
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12 bg-gradient-to-b from-white to-stone-100">
+      <div className="w-full max-w-md space-y-6 bg-white p-8 rounded-xl shadow-md border border-stone-200">
+        <div className="text-center">
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <div className="relative w-16 h-16">
+              <Image
+                src="/logo.png" // Replace with your actual logo path
+                alt="The African Wave Logo"
+                fill
+                style={{ objectFit: "contain" }}
+                priority
+              />
+            </div>
+          </div>
+          <h2 className="text-3xl font-bold text-green-800 mb-2">
+            Create Account
+          </h2>
+          <p className="text-green-700">Sign up to get started</p>
         </div>
-    );
+
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-green-800"
+              >
+                Username
+              </label>
+              <input
+                className="mt-1 block w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                type="text"
+                id="username"
+                name="username"
+                placeholder="Choose a username"
+                value={formData.username}
+                onChange={handleChange}
+              />
+              {errors.username && (
+                <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-green-800"
+              >
+                Email
+              </label>
+              <input
+                className="mt-1 block w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleChange}
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-green-800"
+              >
+                Password
+              </label>
+              <input
+                className="mt-1 block w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Create a password"
+                value={formData.password}
+                onChange={handleChange}
+              />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-green-800"
+              >
+                Confirm Password
+              </label>
+              <input
+                className="mt-1 block w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Confirm your password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+              />
+              {errors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.confirmPassword}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {errors.signUp && (
+            <div className="text-center bg-red-50 p-4 rounded-md">
+              <p className="text-sm text-red-600">{errors.signUp}</p>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out"
+          >
+            Sign Up
+          </button>
+
+          <div className="text-center mt-4">
+            <p className="text-sm text-green-700">
+              Already have an account?{" "}
+              <Link
+                href="/sign-in"
+                className="text-green-800 hover:text-green-900 font-medium underline"
+              >
+                Sign in here
+              </Link>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
