@@ -1,12 +1,6 @@
-<<<<<<< HEAD
-"use client"
-import { useState } from "react";
-import { auth } from "../firebase.js";
-=======
 "use client";
 import { useState, useEffect } from "react";
 import { auth } from "../lib/firebase";
->>>>>>> 8f82dfbf9e9e405211dacf398d3cdee024f105af
 import { signInWithEmailAndPassword } from "firebase/auth";
 import Link from "next/link";
 import Image from "next/image";
