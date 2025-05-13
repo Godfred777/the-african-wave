@@ -116,7 +116,7 @@ export default function SignUp() {
                 Email
               </label>
               <input
-                className="mt-1 block w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                className="mt-1 block w-full px-3 py-2 border text-black border-stone-300 rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 type="email"
                 id="email"
                 name="email"
@@ -137,7 +137,7 @@ export default function SignUp() {
                 Password
               </label>
               <input
-                className="mt-1 block w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                className="mt-1 block w-full px-3 text-black py-2 border border-stone-300 rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 type="password"
                 id="password"
                 name="password"
