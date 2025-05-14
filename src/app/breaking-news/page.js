@@ -1,5 +1,6 @@
 import BreakingNews from "../components/breakingNews";
 
+// Breaking
 export default function BreakingNewsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
