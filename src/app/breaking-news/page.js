@@ -1,6 +1,6 @@
 import BreakingNews from "../components/breakingNews";
 
-// Breaking
+// Breaking news component
 export default function BreakingNewsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
