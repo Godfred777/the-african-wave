@@ -32,6 +32,12 @@ export default function Navbar() {
             Home
           </Link>
           <Link
+            href="/breaking-news"
+            className="text-white hover:text-stone-200 transition-colors duration-200"
+          >
+            Breaking News
+          </Link>
+          <Link
             href="/about"
             className="text-white hover:text-stone-200 transition-colors duration-200"
           >
@@ -95,6 +101,12 @@ export default function Navbar() {
             className="block text-white hover:text-stone-200 transition-colors duration-200"
           >
             Home
+          </Link>
+          <Link
+            href="/breaking-news"
+            className="block text-white hover:text-stone-200 transition-colors duration-200"
+          >
+            Breaking News
           </Link>
           <Link
             href="/about"
